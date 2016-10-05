@@ -1,0 +1,27 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+<h2>Крестики-нолики</h2>
+<div style="overflow: hidden; position: relative;">
+    <div style="float: left;">
+        <input type="button" name="NewGameButton" value="Новая игра" class="btn btn-default">
+    </div>
+    <div style="margin: 10px 10px 10px 10px; float: left;">
+        Играть:
+        <select name="PlayerChoice">
+            <option value=1>Крестиками</option>
+            <option value=2>Ноликами</option>
+        </select>
+    </div>
+</div>
+
+<div id="gameboard_div" style="margin: 10px 10px 10px 10px;">
+</div>
+
+<div id="winnerinfo_div">
+</div>
+
+<script>
+    System.import(hostPath + '/Scripts/app/app.js');
+</script>
