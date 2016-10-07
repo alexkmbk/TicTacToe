@@ -93,6 +93,17 @@ System.register([], function(exports_1, context_1) {
                     }
                     return false;
                 };
+                // Checking if there are no spare cells
+                TicTacToeGame.prototype.IsFilled = function () {
+                    for (var row = 0; row < 3; row++) {
+                        for (var col = 0; col < 3; col++) {
+                            if (this._board[row][col] == -1) {
+                                return false;
+                            }
+                        }
+                    }
+                    return true;
+                };
                 TicTacToeGame.prototype.BoardCheck = function (playerNum) {
                     var checkingVal = playerNum == 1 ? 1 : 0;
                     this.winCombination = new Array(3);
@@ -101,6 +112,11 @@ System.register([], function(exports_1, context_1) {
                         || this.CheckingCrossings(checkingVal)) {
                         this.status = GameStatus.finished;
                         this.winner = playerNum;
+                    }
+                    else if (this.IsFilled()) {
+                        // there are no winner (draw) but the board is filled
+                        this.status = GameStatus.finished;
+                        this.winner = 0;
                     }
                 };
                 return TicTacToeGame;

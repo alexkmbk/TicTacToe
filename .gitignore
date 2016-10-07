@@ -251,3 +251,5 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+/SQLQuery1.sql
+/TicTacToe/App_Data/App_Data.zip

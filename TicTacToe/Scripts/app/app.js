@@ -54,8 +54,10 @@ System.register(["./TicTacToeGame.js", "./BoardHTMLRender.js", "./BoardCanvasRen
             success: function (data) {
                 if (winner == userPlayerNum)
                     $("#winnerinfo_div").html("<H2>Вы выиграли!</H2>");
-                else
+                else if (winner == compPlayerNum)
                     $("#winnerinfo_div").html("<H2>Компьютер выиграл!</H2>");
+                else
+                    $("#winnerinfo_div").html("<H2>Ничья!</H2>");
             }
         });
     }

@@ -15,6 +15,7 @@ namespace TicTacToe.Controllers
 
         public TicTacToeController()
         {
+
         }
 
         // GET: TicTacToe
@@ -32,7 +33,6 @@ namespace TicTacToe.Controllers
             _ctx.Games.Add(game);
             _ctx.SaveChanges();
 
-            //Request.Cookies.Add(new HttpCookie("GameID", game.GameId.ToString()));//System.Guid.NewGuid().ToString()));
             Session["GameID"] = game.GameId.ToString();
             return Json(new { isOk = true, errors = ""});
         }
@@ -41,13 +41,16 @@ namespace TicTacToe.Controllers
         [HttpPost]
         public ActionResult ComputerMove(int playerNum, int[][] board, int lastMoveNum)
         {
-            //Request.Cookies["GameID"].Value;
-            //Request.Cookies.Add(new HttpCookie("GameID", System.Guid.NewGuid().ToString()));
             Cell res = TicTacToeGame.ComputerMove(playerNum, board);
             if (res == null)
                 return Json(new { isOk = false, errors = "" });
             else {
-                int gameID = Int32.Parse(Session["GameID"].ToString());
+                var objGameID = Session["GameID"];
+                if (objGameID == null)
+                {
+                    return Json(new { isOk = false, errors = "Getting session parameter error." });
+                }
+                int gameID = Int32.Parse(objGameID.ToString());
                 Game game = _ctx.Games.FirstOrDefault(e => e.GameId == gameID);
                 _ctx.GameMoves.Add(new GameMove {Game=game, Row = res.row, Col=res.col, MoveOrder = lastMoveNum + 1});
                 try
@@ -65,7 +68,12 @@ namespace TicTacToe.Controllers
         // POST: UserMove
         public ActionResult UserMove(int row, int col, int lastMoveNum)
         {
-            int gameID = Int32.Parse(Session["GameID"].ToString());
+            var objGameID = Session["GameID"];
+            if (objGameID == null)
+            {
+                return Json(new { isOk = false, errors = "Getting session parameter error." });
+            }
+            int gameID = Int32.Parse(objGameID.ToString());
             Game game = _ctx.Games.FirstOrDefault(e => e.GameId == gameID);
             game.GameId = gameID;
             _ctx.GameMoves.Add(new GameMove { Game = game, Row = row, Col = col, MoveOrder = lastMoveNum});
@@ -84,7 +92,12 @@ namespace TicTacToe.Controllers
         // POST: FinishGame
         public ActionResult FinishGame()
         {
-            int gameID = Int32.Parse(Session["GameID"].ToString());
+            var objGameID = Session["GameID"];
+            if (objGameID == null)
+            {
+                return Json(new { isOk = false, errors = "Getting session parameter error." });
+            }
+            int gameID = Int32.Parse(objGameID.ToString());
             Game game = _ctx.Games.FirstOrDefault(e => e.GameId == gameID);
             game.Finished = DateTime.Now;
             try

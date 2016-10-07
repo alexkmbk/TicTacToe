@@ -103,6 +103,18 @@ export class TicTacToeGame {
         return false;
     }
 
+    // Checking if there are no spare cells
+    private IsFilled(): boolean {
+        for (var row = 0; row < 3; row++) {
+            for (var col = 0; col < 3; col++) {
+                if (this._board[row][col] == -1) {
+                    return  false;
+                }
+            }
+        }
+        return true;
+    }
+
     private BoardCheck(playerNum: number): void {
         var checkingVal: number = playerNum == 1 ? 1 : 0;
 
@@ -113,6 +125,11 @@ export class TicTacToeGame {
             || this.CheckingCrossings(checkingVal)) {
             this.status = GameStatus.finished;
             this.winner = playerNum;
+        }
+        else if (this.IsFilled()) {
+            // there are no winner (draw) but the board is filled
+            this.status = GameStatus.finished;
+            this.winner = 0;
         }
     }
 
