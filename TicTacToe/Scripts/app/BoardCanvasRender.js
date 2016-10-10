@@ -16,33 +16,59 @@ System.register([], function(exports_1, context_1) {
             BoardCanvasRender = (function () {
                 function BoardCanvasRender(element, cellClickHandler, width) {
                     var _this = this;
+                    this.ratio = 1;
                     this.MouseClick = function (event) {
+                        var cellWidth = _this.cellWidth * _this.ratio;
                         var mousePos = getMousePos(_this.canvasElement, event);
                         var col = 0;
                         var row = 0;
-                        if (mousePos.x < _this.cellWidth)
+                        if (mousePos.x < cellWidth)
                             col = 0;
-                        else if (mousePos.x < _this.cellWidth * 2)
+                        else if (mousePos.x < cellWidth * 2)
                             col = 1;
                         else
                             col = 2;
-                        if (mousePos.y < _this.cellWidth)
+                        if (mousePos.y < cellWidth)
                             row = 0;
-                        else if (mousePos.y < _this.cellWidth * 2)
+                        else if (mousePos.y < cellWidth * 2)
                             row = 1;
                         else
                             row = 2;
                         _this.cellClickHandler(row, col);
                     };
+                    this.Resize = function (event) {
+                        var height = _this.canvasElement.height;
+                        var width = _this.canvasElement.width;
+                        var rect = _this.canvasElement.getBoundingClientRect();
+                        if (rect.top < 0)
+                            height = _this.canvasElement.height + rect.top;
+                        else if (rect.bottom > window.innerHeight)
+                            height = _this.canvasElement.height - (rect.bottom - window.innerHeight);
+                        else if (_this.canvasElement.height < _this.width && rect.bottom < window.innerHeight)
+                            height = Math.min(_this.width, window.innerHeight);
+                        if (rect.left < 0)
+                            width = _this.canvasElement.width + rect.left;
+                        else if (rect.right > window.innerWidth)
+                            width = _this.canvasElement.width - (rect.right - window.innerWidth);
+                        else if (_this.canvasElement.width < _this.width && rect.right < window.innerWidth)
+                            width = Math.min(_this.width, window.innerWidth);
+                        width = Math.min(height, width);
+                        _this.canvasElement.height = width;
+                        _this.canvasElement.width = width;
+                        _this.ratio = width / _this.width;
+                        _this.DrawBoard(_this.board);
+                    };
                     this.element = element;
                     this.cellClickHandler = cellClickHandler;
-                    this.element.html('<canvas name="board" width="' + width + '" height="' + width + '"></canvas>');
+                    this.width = width; //Math.min(width, window.innerWidth, window.innerHeight);
+                    this.cellWidth = (this.width / 3);
+                    this.element.html('<canvas name="board" width="' + this.width + '" height="' + this.width + '"></canvas>');
                     this.canvas = this.element.find('canvas');
                     this.canvasElement = this.canvas.get(0);
                     this.ctx = this.canvasElement.getContext('2d');
-                    this.width = width;
-                    this.cellWidth = (width / 3);
                     this.element.on('click', function (event) { return _this.MouseClick(event); });
+                    //window.addEventListener('DOMContentLoaded load resize scroll', (event) => this.Resize(event));
+                    window.addEventListener('resize', function (event) { return _this.Resize(event); });
                 }
                 BoardCanvasRender.prototype.CanvasIsSupported = function () {
                     if (this.canvasElement.getContext)
@@ -51,18 +77,20 @@ System.register([], function(exports_1, context_1) {
                         return false;
                 };
                 BoardCanvasRender.prototype.DrawBoard = function (board) {
+                    this.board = board;
                     var ctx = this.ctx;
                     ctx.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height);
-                    ctx.lineWidth = BoardCanvasRender.lineWidth;
+                    var cellWidth = this.cellWidth * this.ratio;
+                    ctx.lineWidth = BoardCanvasRender.lineWidth * this.ratio;
                     ctx.beginPath();
-                    ctx.moveTo(this.cellWidth, 0);
-                    ctx.lineTo(this.cellWidth, this.width);
-                    ctx.moveTo(this.cellWidth * 2, 0);
-                    ctx.lineTo(this.cellWidth * 2, this.width);
-                    ctx.moveTo(0, this.cellWidth);
-                    ctx.lineTo(this.cellWidth * 3, this.cellWidth);
-                    ctx.moveTo(0, this.cellWidth * 2);
-                    ctx.lineTo(this.cellWidth * 3, this.cellWidth * 2);
+                    ctx.moveTo(cellWidth, 0);
+                    ctx.lineTo(cellWidth, this.width);
+                    ctx.moveTo(cellWidth * 2, 0);
+                    ctx.lineTo(cellWidth * 2, this.width);
+                    ctx.moveTo(0, cellWidth);
+                    ctx.lineTo(cellWidth * 3, cellWidth);
+                    ctx.moveTo(0, cellWidth * 2);
+                    ctx.lineTo(cellWidth * 3, cellWidth * 2);
                     ctx.strokeStyle = 'green';
                     ctx.stroke();
                     ctx.closePath();
@@ -82,13 +110,14 @@ System.register([], function(exports_1, context_1) {
                     var ctx = this.ctx;
                     ctx.beginPath();
                     ctx.strokeStyle = 'blue';
-                    var LeftTopX = col * this.cellWidth;
-                    var LeftTopY = row * this.cellWidth;
-                    var pad = BoardCanvasRender.figurePadding;
+                    var pad = BoardCanvasRender.figurePadding * this.ratio;
+                    var cellWidth = this.cellWidth * this.ratio;
+                    var LeftTopX = col * cellWidth;
+                    var LeftTopY = row * cellWidth;
                     ctx.moveTo(LeftTopX + pad, LeftTopY + pad);
-                    ctx.lineTo(LeftTopX + this.cellWidth - pad, LeftTopY + this.cellWidth - pad);
-                    ctx.moveTo(LeftTopX + pad, LeftTopY + this.cellWidth - pad);
-                    ctx.lineTo(LeftTopX + this.cellWidth - pad, LeftTopY + pad);
+                    ctx.lineTo(LeftTopX + cellWidth - pad, LeftTopY + cellWidth - pad);
+                    ctx.moveTo(LeftTopX + pad, LeftTopY + cellWidth - pad);
+                    ctx.lineTo(LeftTopX + cellWidth - pad, LeftTopY + pad);
                     ctx.stroke();
                     ctx.closePath();
                 };
@@ -96,10 +125,11 @@ System.register([], function(exports_1, context_1) {
                     var ctx = this.ctx;
                     ctx.beginPath();
                     ctx.strokeStyle = 'blue';
-                    var LeftTopX = col * this.cellWidth;
-                    var LeftTopY = row * this.cellWidth;
-                    var pad = BoardCanvasRender.figurePadding;
-                    ctx.arc(LeftTopX + this.cellWidth / 2, LeftTopY + this.cellWidth / 2, (this.cellWidth / 2) - pad, 0, 2 * Math.PI);
+                    var pad = BoardCanvasRender.figurePadding * this.ratio;
+                    var cellWidth = this.cellWidth * this.ratio;
+                    var LeftTopX = col * cellWidth;
+                    var LeftTopY = row * cellWidth;
+                    ctx.arc(LeftTopX + cellWidth / 2, LeftTopY + cellWidth / 2, (cellWidth / 2) - pad, 0, 2 * Math.PI);
                     ctx.stroke();
                     ctx.closePath();
                 };
