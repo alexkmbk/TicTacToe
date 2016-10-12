@@ -26,16 +26,75 @@ namespace TicTacToe.Controllers
 
         // POST: NewGame
         [HttpPost]
-        public ActionResult NewGame()
+        public ActionResult NewGame(GameMode GameMode, int PlayerNum = 0)
         {
             Game game = new Game();
             game.Started = DateTime.Now;
+            if (GameMode == GameMode.WithUser)
+            {
+                game.GameStatus = GameStatus.Open;
+
+                if (PlayerNum == 0)
+                    PlayerNum = new Random().Next(1, 2);
+
+                if (PlayerNum == 1)
+                {
+                    game.Player1Id = System.Guid.NewGuid();
+                    Session["PlayerID"] = game.Player1Id.ToString();
+                }
+                else if (PlayerNum == 2)
+                {
+                    game.Player2Id = System.Guid.NewGuid();
+                    Session["PlayerID"] = game.Player2Id.ToString();
+                }
+            }
+            else
+                game.GameStatus = GameStatus.Started;
             _ctx.Games.Add(game);
             _ctx.SaveChanges();
 
             Session["GameID"] = game.GameId.ToString();
-            return Json(new { isOk = true, errors = ""});
+            return Json(new { isOk = true, errors = "", playerNum = PlayerNum, gameId = game.GameId});
         }
+
+        // POST: NewGame
+        [HttpPost]
+        public ActionResult JoinGame(int GameId)
+        {
+
+            Game game = _ctx.Games.FirstOrDefault(e => e.GameId == GameId);
+            if (game == null)
+                return Json(new { isOk = false, errors = "Game ID was not found" });
+
+            if (game.GameStatus == GameStatus.Started)
+                return Json(new { isOk = false, errors = "The game is already started" });
+
+            else if (game.GameStatus == GameStatus.Finished)
+                return Json(new { isOk = false, errors = "The game is already finished, you are welcome to create a new one" });
+
+            int playerNum = 0;
+            game.GameStatus = GameStatus.Started;
+
+            if (game.Player1Id == null)
+            {
+                playerNum = 1;
+                game.Player1Id = System.Guid.NewGuid();
+                Session["PlayerId"] = game.Player1Id.ToString();
+            }
+            else {
+                playerNum = 2;
+                game.Player2Id = System.Guid.NewGuid();
+                Session["PlayerId"] = game.Player2Id.ToString();
+            }
+
+            _ctx.SaveChanges();
+
+            Session["GameID"] = game.GameId.ToString();
+            
+            //Session["PlayerID"] = game.GameId.ToString();
+            return Json(new { isOk = true, errors = "", playerNum = playerNum});
+        }
+
 
         // POST: ComputerMove
         [HttpPost]

@@ -1,7 +1,7 @@
 System.register([], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var Cell, GameStatus, TicTacToeGame;
+    var Cell, GameMode, GameStatus, TicTacToeGame;
     return {
         setters:[],
         execute: function() {
@@ -12,6 +12,12 @@ System.register([], function(exports_1, context_1) {
                 }
                 return Cell;
             }());
+            exports_1("Cell", Cell);
+            (function (GameMode) {
+                GameMode[GameMode["WithComputer"] = 0] = "WithComputer";
+                GameMode[GameMode["WithUser"] = 1] = "WithUser";
+            })(GameMode || (GameMode = {}));
+            exports_1("GameMode", GameMode);
             (function (GameStatus) {
                 GameStatus[GameStatus["notstarted"] = 0] = "notstarted";
                 GameStatus[GameStatus["started"] = 1] = "started";

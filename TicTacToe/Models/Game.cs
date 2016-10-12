@@ -9,6 +9,15 @@ namespace TicTacToe.Models
     public class Game
     {
         public int GameId { get; set; }
+
+        public GameMode GameType { get; set; }
+
+        public GameStatus GameStatus { get; set; }
+
+        public Guid Player1Id { get; set; }
+
+        public Guid Player2Id { get; set; }
+
         public DateTime Started { get; set; }
         public DateTime? Finished { get; set; }
 

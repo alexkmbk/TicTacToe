@@ -1,5 +1,4 @@
-﻿///<reference path="../lib/jquery/jquery.d.ts" />
-import { IBoardRender } from "./IBoardRender.js";
+﻿import { IBoardRender } from "./IBoardRender.js";
 
 export class BoardHTMLRender implements IBoardRender {
     element: JQuery;

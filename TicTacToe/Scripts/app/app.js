@@ -1,4 +1,4 @@
-///<reference path="../lib/jquery/jquery.d.ts" />
+///<reference path="../typings/TicTacToeHub.d.ts" />
 ///<reference path="./TicTacToeGame.ts" />
 ///<reference path="./BoardHTMLRender.ts" />
 ///<reference path="./BoardCanvasRender.ts" />
@@ -6,32 +6,65 @@ System.register(["./TicTacToeGame.js", "./BoardHTMLRender.js", "./BoardCanvasRen
     "use strict";
     var __moduleName = context_1 && context_1.id;
     var TicTacToeGame_js_1, BoardHTMLRender_js_1, BoardCanvasRender_js_1;
-    var userPlayerNum, compPlayerNum, mouseInputAvailable, game, boardRender;
+    var userPlayerNum, opponentPlayerNum, mouseInputAvailable, game, boardRender, gameMode, hub;
+    function JoinGame() {
+        var gameId = $("input[name='GameId']").val();
+        if (!gameId || gameId.length === 0) {
+            msg("Невозможно присоединиться к игре: не заполнен game ID");
+            return;
+        }
+        hub.server.send("JoinGame", gameId);
+        $.ajax({
+            type: 'POST',
+            data: { GameId: gameId },
+            url: "http://" + window.location.host + "/TicTacToe/JoinGame",
+            success: function (data) {
+                if (data["isOk"]) {
+                    game = new TicTacToeGame_js_1.TicTacToeGame();
+                    userPlayerNum = data["playerNum"];
+                    opponentPlayerNum = (userPlayerNum == 1 ? 2 : 1);
+                    boardRender.DrawBoard(game.GetBoard());
+                    mouseInputAvailable = (userPlayerNum == 1 ? true : false);
+                    var message = "<H4>Вы присоединились к игре:</H4>";
+                    message = message + "<H4>Вы играете: " + (userPlayerNum == 1 ? "Крестиками" : "Ноликами") + "</H4>";
+                    message = message + "<H4>Ваш противник играет: " + (userPlayerNum == 1 ? "Ноликами" : "Крестиками") + "</H4>";
+                    $("#gameinfo_div").html(message);
+                }
+                else
+                    msg("Не удалось присоединиться к игре: " + data["errors"]);
+                return;
+            },
+            error: function (xhr, str) {
+                msg("Не удалось присоединиться к игре: " + xhr.responseText);
+            }
+        });
+    }
     function NewGame() {
         mouseInputAvailable = true;
         userPlayerNum = $("select[name='PlayerChoice']").val();
+        gameMode = $("select[name='GameMode']").val();
         if (userPlayerNum == 2) {
             mouseInputAvailable = false; // mouse input on the game board is not allowed
-            compPlayerNum = 1;
+            opponentPlayerNum = 1;
         }
         else
-            compPlayerNum = 2;
-        mouseInputAvailable = true;
+            opponentPlayerNum = 2;
         $.ajax({
             type: 'POST',
+            data: { GameMode: gameMode, playerNum: userPlayerNum },
             url: "http://" + window.location.host + "/TicTacToe/NewGame",
             success: function (data) {
                 if (data["isOk"]) {
-                    $("#winnerinfo_div").html("");
+                    $("#gameinfo_div").html("");
                     game = new TicTacToeGame_js_1.TicTacToeGame();
-                    if (userPlayerNum == 2) {
+                    if (gameMode == TicTacToeGame_js_1.GameMode.WithComputer && userPlayerNum == 2) {
                         $.ajax({
                             type: 'POST',
-                            data: { playerNum: compPlayerNum, board: game.GetBoard(), lastMoveNum: game.lastMoveNum },
+                            data: { playerNum: opponentPlayerNum, board: game.GetBoard(), lastMoveNum: game.lastMoveNum },
                             url: "http://" + window.location.host + "/TicTacToe/ComputerMove",
                             success: function (data) {
                                 if (data["isOk"]) {
-                                    game.Move(compPlayerNum, data['row'], data['col']);
+                                    game.Move(opponentPlayerNum, data['row'], data['col']);
                                     if (game.GameIsFinished()) {
                                         AfterFinishingGame(game.winner);
                                     }
@@ -41,6 +74,10 @@ System.register(["./TicTacToeGame.js", "./BoardHTMLRender.js", "./BoardCanvasRen
                                 return;
                             }
                         });
+                    }
+                    else if (gameMode == TicTacToeGame_js_1.GameMode.WithUser) {
+                        $("input[name='GameId']").val(data["gameId"]);
+                        mouseInputAvailable = false;
                     }
                     boardRender.DrawBoard(game.GetBoard());
                 }
@@ -53,11 +90,15 @@ System.register(["./TicTacToeGame.js", "./BoardHTMLRender.js", "./BoardCanvasRen
             url: "http://" + window.location.host + "/TicTacToe/FinishGame",
             success: function (data) {
                 if (winner == userPlayerNum)
-                    $("#winnerinfo_div").html("<H2>Вы выиграли!</H2>");
-                else if (winner == compPlayerNum)
-                    $("#winnerinfo_div").html("<H2>Компьютер выиграл!</H2>");
+                    $("#gameinfo_div").html("<H2>Вы выиграли!</H2>");
+                else if (winner == opponentPlayerNum) {
+                    if (gameMode == TicTacToeGame_js_1.GameMode.WithComputer)
+                        $("#gameinfo_div").html("<H2>Компьютер выиграл!</H2>");
+                    else
+                        $("#gameinfo_div").html("<H2>Выиграл игрок №" + opponentPlayerNum + "!</H2>");
+                }
                 else
-                    $("#winnerinfo_div").html("<H2>Ничья!</H2>");
+                    $("#gameinfo_div").html("<H2>Ничья!</H2>");
             }
         });
     }
@@ -73,17 +114,18 @@ System.register(["./TicTacToeGame.js", "./BoardHTMLRender.js", "./BoardCanvasRen
             data: { col: _col, row: _row, lastMoveNum: game.lastMoveNum },
             url: "http://" + window.location.host + "/TicTacToe/UserMove",
             success: function (data) {
+                hub.server.send("UserMove", JSON.stringify(new TicTacToeGame_js_1.Cell(_row, _col)));
                 if (game.GameIsFinished()) {
                     AfterFinishingGame(game.winner);
                 }
-                else {
+                else if (gameMode == TicTacToeGame_js_1.GameMode.WithComputer) {
                     $.ajax({
                         type: 'POST',
-                        data: { playerNum: compPlayerNum, board: game.GetBoard(), lastMoveNum: game.lastMoveNum },
+                        data: { playerNum: opponentPlayerNum, board: game.GetBoard(), lastMoveNum: game.lastMoveNum },
                         url: "http://" + window.location.host + "/TicTacToe/ComputerMove",
                         success: function (data) {
                             if (data["isOk"]) {
-                                game.Move(compPlayerNum, data['row'], data['col']);
+                                game.Move(opponentPlayerNum, data['row'], data['col']);
                                 if (game.GameIsFinished()) {
                                     AfterFinishingGame(game.winner);
                                 }
@@ -93,8 +135,16 @@ System.register(["./TicTacToeGame.js", "./BoardHTMLRender.js", "./BoardCanvasRen
                         }
                     });
                 }
+                else
+                    mouseInputAvailable = false; // Cannot move because it is next player order
             }
         });
+    }
+    function GameModeChange() {
+        if ($("select[name='GameMode']").val() == 0)
+            $("input[name='JoinGameButton']").prop("disabled", true);
+        else
+            $("input[name='JoinGameButton']").prop("disabled", false);
     }
     return {
         setters:[
@@ -109,9 +159,36 @@ System.register(["./TicTacToeGame.js", "./BoardHTMLRender.js", "./BoardCanvasRen
             }],
         execute: function() {
             $("input[name='NewGameButton']").on('click', NewGame);
+            $("input[name='JoinGameButton']").on('click', JoinGame);
+            $("select[name='GameMode']").on('change', GameModeChange);
             userPlayerNum = 1;
-            compPlayerNum = 2;
+            opponentPlayerNum = 2;
             mouseInputAvailable = true;
+            $(function () {
+                hub = $.connection.ticTacToeHub;
+                hub.client.broadcastMessage = function (command, commandParams) {
+                    if (command == "JoinGame") {
+                        mouseInputAvailable = (userPlayerNum == 1 ? true : false);
+                        var msg = "<H4>Другой игрок присоединился к игре:</H4>";
+                        msg = msg + "<H4>Вы играете: " + (userPlayerNum == 1 ? "Крестиками" : "Ноликами") + "</H4>";
+                        msg = msg + "<H4>Ваш противник играет: " + (userPlayerNum == 1 ? "Ноликами" : "Крестиками") + "</H4>";
+                        $("#gameinfo_div").html(msg);
+                    }
+                    else if (command == "UserMove") {
+                        mouseInputAvailable = true;
+                        var cell = JSON.parse(commandParams);
+                        if (game.Move(opponentPlayerNum, cell.row, cell.col)) {
+                            boardRender.DrawBoard(game.GetBoard());
+                        }
+                        if (game.GameIsFinished()) {
+                            AfterFinishingGame(game.winner);
+                            mouseInputAvailable = false;
+                            ;
+                        }
+                    }
+                };
+                $.connection.hub.start();
+            });
             boardRender = new BoardCanvasRender_js_1.BoardCanvasRender($('#gameboard_div'), MouseClick, 200);
             // There is no CanvasIsSupported method in IBoardRender interface, so we need type casting
             if (!boardRender.CanvasIsSupported())

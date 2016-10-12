@@ -5,6 +5,19 @@ using System.Web;
 
 namespace TicTacToe
 {
+    public enum GameMode
+    {
+        WithComputer = 0,
+        WithUser = 1
+    }
+
+    public enum GameStatus
+    {
+        Open = 0, // Game was created but still is in waiting for connection from another user
+        Started = 1,
+        Finished = 2,
+    }
+
     public class RowCombination
     {
         public List<Cell> SpareCells;

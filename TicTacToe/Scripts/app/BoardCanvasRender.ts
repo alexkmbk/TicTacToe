@@ -1,6 +1,4 @@
-﻿///<reference path="../lib/jquery/jquery.d.ts" />
-
-import { IBoardRender } from "./IBoardRender.js";
+﻿import { IBoardRender } from "./IBoardRender.js";
 
 export class BoardCanvasRender implements  IBoardRender {
     element: JQuery;
@@ -27,7 +25,6 @@ export class BoardCanvasRender implements  IBoardRender {
         this.ctx = this.canvasElement.getContext('2d');
 
         this.element.on('click', (event) => this.MouseClick(event));
-        //window.addEventListener('DOMContentLoaded load resize scroll', (event) => this.Resize(event));
         window.addEventListener('resize', (event) => this.Resize(event));
     }
     public CanvasIsSupported(): boolean{
@@ -171,7 +168,8 @@ export class BoardCanvasRender implements  IBoardRender {
         this.canvasElement.height = width;
         this.canvasElement.width = width;
         this.ratio = width / this.width;
-        this.DrawBoard(this.board);
+        if (this.board)
+            this.DrawBoard(this.board);
 
     }
 }

@@ -1,10 +1,15 @@
-﻿class Cell {
+﻿export class Cell {
     public row: number;
     public col: number;
     constructor(row: number, col: number) {
         this.row = row;
         this.col = col;
     }
+}
+
+export enum GameMode {
+    WithComputer = 0,
+    WithUser = 1
 }
 
 enum GameStatus {

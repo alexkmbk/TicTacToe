@@ -1,4 +1,3 @@
-///<reference path="../lib/jquery/jquery.d.ts" />
 System.register([], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
@@ -56,7 +55,8 @@ System.register([], function(exports_1, context_1) {
                         _this.canvasElement.height = width;
                         _this.canvasElement.width = width;
                         _this.ratio = width / _this.width;
-                        _this.DrawBoard(_this.board);
+                        if (_this.board)
+                            _this.DrawBoard(_this.board);
                     };
                     this.element = element;
                     this.cellClickHandler = cellClickHandler;
@@ -67,7 +67,6 @@ System.register([], function(exports_1, context_1) {
                     this.canvasElement = this.canvas.get(0);
                     this.ctx = this.canvasElement.getContext('2d');
                     this.element.on('click', function (event) { return _this.MouseClick(event); });
-                    //window.addEventListener('DOMContentLoaded load resize scroll', (event) => this.Resize(event));
                     window.addEventListener('resize', function (event) { return _this.Resize(event); });
                 }
                 BoardCanvasRender.prototype.CanvasIsSupported = function () {

@@ -3,8 +3,7 @@
 // Definitions by: Boris Yankov <https://github.com/borisyankov/>, John Reilly <https://github.com/johnnyreilly>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
-
-/// <reference path="../jquery/jquery.d.ts"/>
+///<reference path="../jquery/jquery.d.ts" />
 
 declare namespace JQueryUI {
     // Accordion //////////////////////////////////////////////////
