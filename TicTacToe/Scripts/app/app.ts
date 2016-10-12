@@ -12,13 +12,14 @@ import { BoardCanvasRender } from "./BoardCanvasRender.js";
 import { IBoardRender } from "./IBoardRender.js";
 
 $("input[name='NewGameButton']").on('click', NewGame);
-$("input[name='JoinGameButton']").on('click', JoinGame);
-$("select[name='GameMode']").on('change', GameModeChange);
+$("input[name='JoinGameButton']").on('click', JoinGameClick);
+$("input[name='InviteButton']").on('click', InviteClick);
 
 var userPlayerNum = 1;
 var opponentPlayerNum = 2;
 var mouseInputAvailable: boolean = true;
 var game: TicTacToeGame;
+var gameId: string;
 var boardRender: IBoardRender;
 var gameMode: GameMode;
 
@@ -45,6 +46,9 @@ $(function () {
                 mouseInputAvailable = false;;
             }
         }
+        else if (command == "Leave") {
+            $("#gameinfo_div").html("<H4>Ваш противник покинул игру</H4>");
+        }
     };
 
     $.connection.hub.start();
@@ -56,14 +60,16 @@ boardRender = new BoardCanvasRender($('#gameboard_div'), MouseClick, 200);
 if (!(<BoardCanvasRender>boardRender).CanvasIsSupported()) 
     boardRender = new BoardHTMLRender($('#gameboard_div'), MouseClick);
 
-function JoinGame() {
-    var gameId = $("input[name='GameId']").val();
+function JoinGameClick() {
+    JoinGameDialog(JoinGame);
+}
+
+function JoinGame(gameId: string) {
+    
     if (!gameId || gameId.length === 0) {
         msg("Невозможно присоединиться к игре: не заполнен game ID");
         return;
     }
-
-    hub.server.send("JoinGame", gameId);
 
     $.ajax({
         type: 'POST',
@@ -72,6 +78,13 @@ function JoinGame() {
         url: "http://" + window.location.host + "/TicTacToe/JoinGame",
         success: function (data) {
             if (data["isOk"]) {
+
+                if (game && !game.GameIsFinished()) {
+                    hub.server.send("Leave", "");
+                }
+
+                hub.server.send("JoinGame", gameId);
+
                 game = new TicTacToeGame();
                 userPlayerNum = data["playerNum"];
                 opponentPlayerNum = (userPlayerNum == 1 ? 2 : 1);
@@ -101,6 +114,9 @@ function NewGame() {
     userPlayerNum = $("select[name='PlayerChoice']").val();
     gameMode = $("select[name='GameMode']").val();
 
+    if (game && !game.GameIsFinished()) {
+        hub.server.send("Leave", "");
+    }
 
     if (userPlayerNum == 2) {
         mouseInputAvailable = false; // mouse input on the game board is not allowed
@@ -137,7 +153,8 @@ function NewGame() {
                     });
                 }
                 else if (gameMode == GameMode.WithUser) {
-                    $("input[name='GameId']").val(data["gameId"]);
+                    gameId = data["gameId"];
+                    $("input[name='InviteButton']").prop('disabled', false);
                     mouseInputAvailable = false;
                 }
                 boardRender.DrawBoard(game.GetBoard());
@@ -208,9 +225,41 @@ function MouseClick(_row: number, _col: number) {
 
 }
 
-function GameModeChange() {
-    if ($("select[name='GameMode']").val() == 0)
-        $("input[name='JoinGameButton']").prop("disabled", true);
-    else
-        $("input[name='JoinGameButton']").prop("disabled", false);
-}  
+function InviteClick() {
+    window.prompt("Отправьте идентификатор игры, другому игроку,чтобы он мог присоединиться:", gameId);    
+}
+
+function JoinGameDialog(JoinGameClickHandler: Function) {
+    var dlgContainer: JQuery;
+
+    function JoinGameClick() {
+        var gameId = dlgContainer.find("input[name='GameID']").val();
+
+        if (!gameId || gameId.length === 0) {
+            msg("Невозможно присоединиться к игре: не заполнен game ID");
+            return;
+        }
+
+        JoinGameClickHandler(gameId);
+        dlgContainer.find("input[type='button']").off('click');
+        dlgContainer.dialog("destroy").remove();
+
+    }
+
+    dlgContainer = $("#JoinGameDialog");
+    if (dlgContainer.length == 0) {
+        dlgContainer = $(document.createElement("div"));
+        dlgContainer.attr("id", "JoinGameDialog");
+
+        dlgContainer.append("Game ID: <input type = 'text' name = 'GameID'>");
+        dlgContainer.append("<input type = 'button' value='Join game'>");
+        dlgContainer.find("input[type='button']").on('click', JoinGameClick); 
+        document.body.appendChild(dlgContainer.get(0));
+    }
+
+    dlgContainer.dialog({
+        width: "40%",
+        title: "Присоединение к игре"
+    }
+    );
+}

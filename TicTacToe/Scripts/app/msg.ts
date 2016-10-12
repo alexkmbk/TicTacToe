@@ -19,11 +19,6 @@ function msg(message: string, _type?: MsgTypes, _title?: string) {
             dlgContainer = $(document.createElement("div"));
             dlgContainer.attr("id", "msgdialog_global_error");
 
-            // image
-            //var img = $(document.createElement("img"));
-            //img.attr('src', "errorImage.gif");
-            //dlgContainer.append(img);
-
             // text
             var text = $(document.createElement("span"));
             text.attr("name", "text");
@@ -39,11 +34,6 @@ function msg(message: string, _type?: MsgTypes, _title?: string) {
         if (dlgContainer.length == 0) {
             dlgContainer = $(document.createElement("div"));
             dlgContainer.attr("id", "msgdialog_global_message");
-
-            // image
-            //var img = $(document.createElement("img"));
-            //img.attr('src', "errorImage.gif");
-            //dlgContainer.append(img);
 
             // text
             var text = $(document.createElement("span"));
