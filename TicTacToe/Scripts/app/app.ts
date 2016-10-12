@@ -252,7 +252,7 @@ function JoinGameDialog(JoinGameClickHandler: Function) {
         dlgContainer.attr("id", "JoinGameDialog");
 
         dlgContainer.append("Game ID: <input type = 'text' name = 'GameID'>");
-        dlgContainer.append("<input type = 'button' value='Join game'>");
+        dlgContainer.append("<input type = 'button' value='Присоединиться к игре' style='margin: 10px 10px 10px 10px;'>");
         dlgContainer.find("input[type='button']").on('click', JoinGameClick); 
         document.body.appendChild(dlgContainer.get(0));
     }
