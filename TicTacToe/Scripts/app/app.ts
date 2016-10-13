@@ -28,9 +28,9 @@ $(function () {
     hub.client.broadcastMessage = function (command, commandParams) {
         if (command == "JoinGame") {
             mouseInputAvailable = (userPlayerNum == 1 ? true: false);
-            var msg = "<H4>Другой игрок присоединился к игре:</H4>";
-            msg = msg + "<H4>Вы играете: " + (userPlayerNum == 1 ? "Крестиками" : "Ноликами") + "</H4>";
-            msg = msg + "<H4>Ваш противник играет: " + (userPlayerNum == 1 ? "Ноликами" : "Крестиками") + "</H4>";
+            var msg = "<p>Другой игрок присоединился к игре:</p>";
+            msg = msg + "<p>Вы играете: " + (userPlayerNum == 1 ? "Крестиками" : "Ноликами") + "</p>";
+            msg = msg + "<p>Ваш противник играет: " + (userPlayerNum == 1 ? "Ноликами" : "Крестиками") + "</p>";
             $("#gameinfo_div").html(msg);
         }
         else if (command == "UserMove") {
@@ -89,9 +89,9 @@ function JoinGame(gameId: string) {
                 boardRender.DrawBoard(game.GetBoard());
                 mouseInputAvailable = (userPlayerNum == 1 ? true : false);
 
-                var message = "<H4>Вы присоединились к игре:</H4>";
-                message = message + "<H4>Вы играете: " + (userPlayerNum == 1 ? "Крестиками" : "Ноликами") + "</H4>";
-                message = message + "<H4>Ваш противник играет: " + (userPlayerNum == 1 ? "Ноликами" : "Крестиками") + "</H4>";
+                var message = "<p>Вы присоединились к игре:</p>";
+                message = message + "<p>Вы играете: " + (userPlayerNum == 1 ? "Крестиками" : "Ноликами") + "</p>";
+                message = message + "<p>Ваш противник играет: " + (userPlayerNum == 1 ? "Ноликами" : "Крестиками") + "</p>";
                 $("#gameinfo_div").html(message);
             }
             else
