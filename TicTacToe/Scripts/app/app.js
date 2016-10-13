@@ -2,10 +2,10 @@
 ///<reference path="./TicTacToeGame.ts" />
 ///<reference path="./BoardHTMLRender.ts" />
 ///<reference path="./BoardCanvasRender.ts" />
-System.register(["./TicTacToeGame.js", "./BoardHTMLRender.js", "./BoardCanvasRender.js"], function(exports_1, context_1) {
+System.register(["./TicTacToeGame.js", "./BoardHTMLRender.js"], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var TicTacToeGame_js_1, BoardHTMLRender_js_1, BoardCanvasRender_js_1;
+    var TicTacToeGame_js_1, BoardHTMLRender_js_1;
     var userPlayerNum, opponentPlayerNum, mouseInputAvailable, game, gameId, boardRender, gameMode, hub;
     function JoinGameClick() {
         JoinGameDialog(JoinGame);
@@ -212,9 +212,6 @@ System.register(["./TicTacToeGame.js", "./BoardHTMLRender.js", "./BoardCanvasRen
             },
             function (BoardHTMLRender_js_1_1) {
                 BoardHTMLRender_js_1 = BoardHTMLRender_js_1_1;
-            },
-            function (BoardCanvasRender_js_1_1) {
-                BoardCanvasRender_js_1 = BoardCanvasRender_js_1_1;
             }],
         execute: function() {
             $("input[name='NewGameButton']").on('click', NewGame);
@@ -251,10 +248,10 @@ System.register(["./TicTacToeGame.js", "./BoardHTMLRender.js", "./BoardCanvasRen
                 };
                 $.connection.hub.start();
             });
-            boardRender = new BoardCanvasRender_js_1.BoardCanvasRender($('#gameboard_div'), MouseClick, 200);
+            //boardRender = new BoardCanvasRender($('#gameboard_div'), MouseClick, 200);
             // There is no CanvasIsSupported method in IBoardRender interface, so we need type casting
-            if (!boardRender.CanvasIsSupported())
-                boardRender = new BoardHTMLRender_js_1.BoardHTMLRender($('#gameboard_div'), MouseClick);
+            //if (!(<BoardCanvasRender>boardRender).CanvasIsSupported()) 
+            boardRender = new BoardHTMLRender_js_1.BoardHTMLRender($('#gameboard_div'), MouseClick);
         }
     }
 });

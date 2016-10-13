@@ -52,10 +52,10 @@ $(function () {
     $.connection.hub.start();
 });
 
-boardRender = new BoardCanvasRender($('#gameboard_div'), MouseClick, 200);
+//boardRender = new BoardCanvasRender($('#gameboard_div'), MouseClick, 200);
 
 // There is no CanvasIsSupported method in IBoardRender interface, so we need type casting
-if (!(<BoardCanvasRender>boardRender).CanvasIsSupported()) 
+//if (!(<BoardCanvasRender>boardRender).CanvasIsSupported()) 
     boardRender = new BoardHTMLRender($('#gameboard_div'), MouseClick);
 
 function JoinGameClick() {
