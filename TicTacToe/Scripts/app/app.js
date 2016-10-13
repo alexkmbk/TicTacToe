@@ -150,7 +150,34 @@ System.register(["./TicTacToeGame.js", "./BoardHTMLRender.js", "./BoardCanvasRen
         });
     }
     function InviteClick() {
-        window.prompt("Отправьте идентификатор игры, другому игроку,чтобы он мог присоединиться:", gameId);
+        //window.prompt("Отправьте идентификатор игры, другому игроку,чтобы он мог присоединиться:", gameId);    
+        var dlgContainer;
+        dlgContainer = $("#InviteDialog");
+        if (dlgContainer.length == 0) {
+            dlgContainer = $(document.createElement("div"));
+            dlgContainer.attr("id", "InviteDialog");
+            dlgContainer.append("<p>Отправьте идентификатор игры, другому игроку,чтобы он мог присоединиться:</p>");
+            dlgContainer.append("<input onClick='this.setSelectionRange(0, this.value.length)' type = 'text' value='" + gameId + "'>");
+            (dlgContainer.find("input").get(0)).setSelectionRange(0, gameId.toString().length);
+            dlgContainer.append("<input type = 'button' value='Копировать в буфер' style='margin: 10px 10px 10px 10px;'>");
+            dlgContainer.find("input[type='button']").on('click', CopyBuffer);
+            document.body.appendChild(dlgContainer.get(0));
+        }
+        function CopyBuffer() {
+            (dlgContainer.find("input").get(0)).setSelectionRange(0, gameId.toString().length);
+            try {
+                var successful = document.execCommand('copy');
+                if (!successful)
+                    msg("Не удалось скопировать Game ID в буфер обмена");
+            }
+            catch (err) {
+                msg("Не удалось скопировать Game ID в буфер обмена");
+            }
+        }
+        dlgContainer.dialog({
+            width: "40%",
+            title: "Пригласить партнера в игру"
+        });
     }
     function JoinGameDialog(JoinGameClickHandler) {
         var dlgContainer;
