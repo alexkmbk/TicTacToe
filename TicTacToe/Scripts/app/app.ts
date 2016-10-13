@@ -4,8 +4,6 @@
 ///<reference path="./BoardHTMLRender.ts" />
 ///<reference path="./BoardCanvasRender.ts" />
 
-
-
 import { TicTacToeGame, GameMode, Cell } from "./TicTacToeGame.js";
 import { BoardHTMLRender } from "./BoardHTMLRender.js";
 import { BoardCanvasRender } from "./BoardCanvasRender.js";

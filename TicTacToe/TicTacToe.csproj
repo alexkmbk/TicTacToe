@@ -263,6 +263,7 @@
     <TypeScriptCompile Include="Scripts\app\IBoardRender.ts" />
     <TypeScriptCompile Include="Scripts\app\msg.ts" />
     <TypeScriptCompile Include="Scripts\app\TicTacToeGame.ts" />
+    <TypeScriptCompile Include="Scripts\typings\jqueryui\jqueryui.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\signalr\signalr-1.0.d.ts" />
     <TypeScriptCompile Include="Scripts\typings\signalr\signalr.d.ts" />
