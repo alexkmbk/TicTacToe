@@ -1,13 +1,15 @@
 ﻿import { IBoardRender } from "./IBoardRender.js";
+import { Cell } from "./TicTacToeGame.js";
 
 export class BoardHTMLRender implements IBoardRender {
+    public winCombination: Cell[];
     element: JQuery;
     cellClickHandler: Function;
     constructor(element: JQuery, cellClickHandler: Function) {
         this.element = element;
         this.cellClickHandler = cellClickHandler;
         this.element.on('click', 'td', (event) => this.MouseClick(event));
-
+        this.winCombination = [];
     }
     public DrawBoard(board: number[][]) {
         var html = "<table class='table table-striped table-bordered table-condensed' style='width:200px'>";
@@ -35,5 +37,10 @@ export class BoardHTMLRender implements IBoardRender {
         var col = target.index();
         var row = target.parent().index();
         this.cellClickHandler(row, col);
+    }
+
+    DrawCrossingLine(comb: Cell[]) {
+
+        // the method is not implemented yet
     }
 }

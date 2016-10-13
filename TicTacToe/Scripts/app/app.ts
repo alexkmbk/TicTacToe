@@ -37,6 +37,8 @@ $(function () {
             mouseInputAvailable = true;
             var cell = <Cell>JSON.parse(commandParams);
             if (game.Move(opponentPlayerNum, cell.row, cell.col)) {
+                if (game.winner != 0)
+                    boardRender.winCombination = game.winCombination;
                 boardRender.DrawBoard(game.GetBoard());
             }
             if (game.GameIsFinished()) {
@@ -84,6 +86,8 @@ function JoinGame(gameId: string) {
                 hub.server.send("JoinGame", gameId);
 
                 game = new TicTacToeGame();
+                boardRender.winCombination = [];
+
                 userPlayerNum = data["playerNum"];
                 opponentPlayerNum = (userPlayerNum == 1 ? 2 : 1);
                 boardRender.DrawBoard(game.GetBoard());
@@ -131,6 +135,7 @@ function NewGame() {
             if (data["isOk"]) {
                 $("#gameinfo_div").html("");
                 game = new TicTacToeGame();
+                boardRender.winCombination = [];
                 if (gameMode == GameMode.WithComputer && userPlayerNum == 2) {
                     $.ajax({
                         type: 'POST',
@@ -141,9 +146,14 @@ function NewGame() {
                             if (data["isOk"]) {
                                 game.Move(opponentPlayerNum, data['row'], data['col']);
                                 if (game.GameIsFinished()) {
+                                    if (game.winner != 0)
+                                        boardRender.winCombination = game.winCombination;
+                                    boardRender.DrawBoard(game.GetBoard());
                                     AfterFinishingGame(game.winner);
                                 }
-                                boardRender.DrawBoard(game.GetBoard());
+                                else
+                                    boardRender.DrawBoard(game.GetBoard());
+                                
                             }
                             mouseInputAvailable = true;
                             return;
@@ -186,6 +196,10 @@ function MouseClick(_row: number, _col: number) {
     if (!mouseInputAvailable) return;
 
     if (!game.Move(userPlayerNum, _row, _col)) return;
+
+    if (game.winner != 0)
+        boardRender.winCombination = game.winCombination;
+
     boardRender.DrawBoard(game.GetBoard());
 
     $.ajax({
@@ -207,9 +221,13 @@ function MouseClick(_row: number, _col: number) {
                         if (data["isOk"]) {
                             game.Move(opponentPlayerNum, data['row'], data['col']);
                             if (game.GameIsFinished()) {
+                                if (game.winner != 0)
+                                    boardRender.winCombination = game.winCombination;
+                                boardRender.DrawBoard(game.GetBoard());
                                 AfterFinishingGame(game.winner);
                             }
-                            boardRender.DrawBoard(game.GetBoard());
+                            else
+                                boardRender.DrawBoard(game.GetBoard());
                         }
                         mouseInputAvailable = true;
                     }
@@ -238,13 +256,20 @@ function InviteClick() {
         (<HTMLInputElement>(dlgContainer.find("input").get(0))).setSelectionRange(0, gameId.toString().length);
 
         dlgContainer.append("<input type = 'button' value='Копировать в буфер' style='margin: 10px 10px 10px 10px;'>");
-        dlgContainer.find("input[type='button']").on('click', CopyBuffer); 
-        
+        dlgContainer.find("input[type='button']").on('click', CopyBuffer);
+
         document.body.appendChild(dlgContainer.get(0));
     }
+    else {
+        var text = dlgContainer.find("input");
+        text.val(gameId);
+        (<HTMLInputElement>(text.get(0))).setSelectionRange(0, gameId.toString().length);
+    }
+
 
     function CopyBuffer() {
         (<HTMLInputElement>(dlgContainer.find("input").get(0))).setSelectionRange(0, gameId.toString().length);
+        var error = false;
         try {
             var successful = document.execCommand('copy');
             if (!successful)
@@ -252,6 +277,10 @@ function InviteClick() {
         } catch (err) {
             msg("Не удалось скопировать Game ID в буфер обмена");
         }
+        if (error)
+            msg("Не удалось скопировать Game ID в буфер обмена");
+        else
+            dlgContainer.dialog("destroy").remove();
     }
 
     dlgContainer.dialog({

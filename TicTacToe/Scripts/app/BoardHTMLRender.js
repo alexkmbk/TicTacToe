@@ -17,6 +17,7 @@ System.register([], function(exports_1, context_1) {
                     this.element = element;
                     this.cellClickHandler = cellClickHandler;
                     this.element.on('click', 'td', function (event) { return _this.MouseClick(event); });
+                    this.winCombination = [];
                 }
                 BoardHTMLRender.prototype.DrawBoard = function (board) {
                     var html = "<table class='table table-striped table-bordered table-condensed' style='width:200px'>";
@@ -37,6 +38,9 @@ System.register([], function(exports_1, context_1) {
                     }
                     html = html + "</table>";
                     this.element.html(html);
+                };
+                BoardHTMLRender.prototype.DrawCrossingLine = function (comb) {
+                    // the method is not implemented yet
                 };
                 return BoardHTMLRender;
             }());

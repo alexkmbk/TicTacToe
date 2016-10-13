@@ -2,10 +2,10 @@
 ///<reference path="./TicTacToeGame.ts" />
 ///<reference path="./BoardHTMLRender.ts" />
 ///<reference path="./BoardCanvasRender.ts" />
-System.register(["./TicTacToeGame.js", "./BoardHTMLRender.js"], function(exports_1, context_1) {
+System.register(["./TicTacToeGame.js", "./BoardHTMLRender.js", "./BoardCanvasRender.js"], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
-    var TicTacToeGame_js_1, BoardHTMLRender_js_1;
+    var TicTacToeGame_js_1, BoardHTMLRender_js_1, BoardCanvasRender_js_1;
     var userPlayerNum, opponentPlayerNum, mouseInputAvailable, game, gameId, boardRender, gameMode, hub;
     function JoinGameClick() {
         JoinGameDialog(JoinGame);
@@ -26,6 +26,7 @@ System.register(["./TicTacToeGame.js", "./BoardHTMLRender.js"], function(exports
                     }
                     hub.server.send("JoinGame", gameId);
                     game = new TicTacToeGame_js_1.TicTacToeGame();
+                    boardRender.winCombination = [];
                     userPlayerNum = data["playerNum"];
                     opponentPlayerNum = (userPlayerNum == 1 ? 2 : 1);
                     boardRender.DrawBoard(game.GetBoard());
@@ -65,6 +66,7 @@ System.register(["./TicTacToeGame.js", "./BoardHTMLRender.js"], function(exports
                 if (data["isOk"]) {
                     $("#gameinfo_div").html("");
                     game = new TicTacToeGame_js_1.TicTacToeGame();
+                    boardRender.winCombination = [];
                     if (gameMode == TicTacToeGame_js_1.GameMode.WithComputer && userPlayerNum == 2) {
                         $.ajax({
                             type: 'POST',
@@ -74,9 +76,13 @@ System.register(["./TicTacToeGame.js", "./BoardHTMLRender.js"], function(exports
                                 if (data["isOk"]) {
                                     game.Move(opponentPlayerNum, data['row'], data['col']);
                                     if (game.GameIsFinished()) {
+                                        if (game.winner != 0)
+                                            boardRender.winCombination = game.winCombination;
+                                        boardRender.DrawBoard(game.GetBoard());
                                         AfterFinishingGame(game.winner);
                                     }
-                                    boardRender.DrawBoard(game.GetBoard());
+                                    else
+                                        boardRender.DrawBoard(game.GetBoard());
                                 }
                                 mouseInputAvailable = true;
                                 return;
@@ -117,6 +123,8 @@ System.register(["./TicTacToeGame.js", "./BoardHTMLRender.js"], function(exports
             return;
         if (!game.Move(userPlayerNum, _row, _col))
             return;
+        if (game.winner != 0)
+            boardRender.winCombination = game.winCombination;
         boardRender.DrawBoard(game.GetBoard());
         $.ajax({
             type: 'POST',
@@ -136,9 +144,13 @@ System.register(["./TicTacToeGame.js", "./BoardHTMLRender.js"], function(exports
                             if (data["isOk"]) {
                                 game.Move(opponentPlayerNum, data['row'], data['col']);
                                 if (game.GameIsFinished()) {
+                                    if (game.winner != 0)
+                                        boardRender.winCombination = game.winCombination;
+                                    boardRender.DrawBoard(game.GetBoard());
                                     AfterFinishingGame(game.winner);
                                 }
-                                boardRender.DrawBoard(game.GetBoard());
+                                else
+                                    boardRender.DrawBoard(game.GetBoard());
                             }
                             mouseInputAvailable = true;
                         }
@@ -163,8 +175,14 @@ System.register(["./TicTacToeGame.js", "./BoardHTMLRender.js"], function(exports
             dlgContainer.find("input[type='button']").on('click', CopyBuffer);
             document.body.appendChild(dlgContainer.get(0));
         }
+        else {
+            var text = dlgContainer.find("input");
+            text.val(gameId);
+            (text.get(0)).setSelectionRange(0, gameId.toString().length);
+        }
         function CopyBuffer() {
             (dlgContainer.find("input").get(0)).setSelectionRange(0, gameId.toString().length);
+            var error = false;
             try {
                 var successful = document.execCommand('copy');
                 if (!successful)
@@ -173,6 +191,10 @@ System.register(["./TicTacToeGame.js", "./BoardHTMLRender.js"], function(exports
             catch (err) {
                 msg("Не удалось скопировать Game ID в буфер обмена");
             }
+            if (error)
+                msg("Не удалось скопировать Game ID в буфер обмена");
+            else
+                dlgContainer.dialog("destroy").remove();
         }
         dlgContainer.dialog({
             width: "40%",
@@ -212,6 +234,9 @@ System.register(["./TicTacToeGame.js", "./BoardHTMLRender.js"], function(exports
             },
             function (BoardHTMLRender_js_1_1) {
                 BoardHTMLRender_js_1 = BoardHTMLRender_js_1_1;
+            },
+            function (BoardCanvasRender_js_1_1) {
+                BoardCanvasRender_js_1 = BoardCanvasRender_js_1_1;
             }],
         execute: function() {
             $("input[name='NewGameButton']").on('click', NewGame);
@@ -234,6 +259,8 @@ System.register(["./TicTacToeGame.js", "./BoardHTMLRender.js"], function(exports
                         mouseInputAvailable = true;
                         var cell = JSON.parse(commandParams);
                         if (game.Move(opponentPlayerNum, cell.row, cell.col)) {
+                            if (game.winner != 0)
+                                boardRender.winCombination = game.winCombination;
                             boardRender.DrawBoard(game.GetBoard());
                         }
                         if (game.GameIsFinished()) {
@@ -248,10 +275,10 @@ System.register(["./TicTacToeGame.js", "./BoardHTMLRender.js"], function(exports
                 };
                 $.connection.hub.start();
             });
-            //boardRender = new BoardCanvasRender($('#gameboard_div'), MouseClick, 200);
+            boardRender = new BoardCanvasRender_js_1.BoardCanvasRender($('#gameboard_div'), MouseClick, 200);
             // There is no CanvasIsSupported method in IBoardRender interface, so we need type casting
-            //if (!(<BoardCanvasRender>boardRender).CanvasIsSupported()) 
-            boardRender = new BoardHTMLRender_js_1.BoardHTMLRender($('#gameboard_div'), MouseClick);
+            if (!boardRender.CanvasIsSupported())
+                boardRender = new BoardHTMLRender_js_1.BoardHTMLRender($('#gameboard_div'), MouseClick);
         }
     }
 });

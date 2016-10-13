@@ -1,4 +1,5 @@
 ﻿import { IBoardRender } from "./IBoardRender.js";
+import { Cell } from "./TicTacToeGame.js";
 
 export class BoardCanvasRender implements  IBoardRender {
     element: JQuery;
@@ -10,6 +11,7 @@ export class BoardCanvasRender implements  IBoardRender {
     cellWidth: number;
     public static lineWidth: number = 4;
     public static figurePadding: number = 16;
+    public winCombination: Cell[];
 
     ratio: number = 1;
     board: number[][];
@@ -23,7 +25,7 @@ export class BoardCanvasRender implements  IBoardRender {
         this.canvas = this.element.find('canvas');
         this.canvasElement = <HTMLCanvasElement>this.canvas.get(0);
         this.ctx = this.canvasElement.getContext('2d');
-
+        this.winCombination = [];
         this.element.on('click', (event) => this.MouseClick(event));
         window.addEventListener('resize', (event) => this.Resize(event));
     }
@@ -76,6 +78,7 @@ export class BoardCanvasRender implements  IBoardRender {
             }
         }
 
+        this.DrawCrossingLine(this.winCombination);
     }
 
     DrawX(row: number, col: number) {
@@ -118,6 +121,34 @@ export class BoardCanvasRender implements  IBoardRender {
         ctx.stroke();
         ctx.closePath();
 
+    }
+
+    DrawCrossingLine(comb: Cell[]) {
+
+        var ctx = this.ctx;
+
+        var lineWidthBefore = ctx.lineWidth;
+
+        ctx.lineWidth = BoardCanvasRender.lineWidth * this.ratio * 2;
+
+        ctx.beginPath();
+        ctx.strokeStyle = 'blue';
+
+        var cellWidth = this.cellWidth * this.ratio;
+
+        for (var i = 0; i < comb.length - 1; i++) {
+            var LeftTopX: number = comb[i].col * cellWidth;
+            var LeftTopY: number = comb[i].row * cellWidth;
+            ctx.moveTo(LeftTopX + cellWidth / 2, LeftTopY + cellWidth / 2);
+
+            LeftTopX = comb[i+1].col * cellWidth;
+            LeftTopY = comb[i+1].row * cellWidth;
+            ctx.lineTo(LeftTopX + cellWidth / 2, LeftTopY + cellWidth / 2);
+        }
+
+        ctx.stroke();
+        ctx.closePath();
+        ctx.lineWidth = lineWidthBefore;
     }
 
     MouseClick = (event: any) => {

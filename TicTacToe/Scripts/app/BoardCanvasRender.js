@@ -66,6 +66,7 @@ System.register([], function(exports_1, context_1) {
                     this.canvas = this.element.find('canvas');
                     this.canvasElement = this.canvas.get(0);
                     this.ctx = this.canvasElement.getContext('2d');
+                    this.winCombination = [];
                     this.element.on('click', function (event) { return _this.MouseClick(event); });
                     window.addEventListener('resize', function (event) { return _this.Resize(event); });
                 }
@@ -104,6 +105,7 @@ System.register([], function(exports_1, context_1) {
                             }
                         }
                     }
+                    this.DrawCrossingLine(this.winCombination);
                 };
                 BoardCanvasRender.prototype.DrawX = function (row, col) {
                     var ctx = this.ctx;
@@ -131,6 +133,25 @@ System.register([], function(exports_1, context_1) {
                     ctx.arc(LeftTopX + cellWidth / 2, LeftTopY + cellWidth / 2, (cellWidth / 2) - pad, 0, 2 * Math.PI);
                     ctx.stroke();
                     ctx.closePath();
+                };
+                BoardCanvasRender.prototype.DrawCrossingLine = function (comb) {
+                    var ctx = this.ctx;
+                    var lineWidthBefore = ctx.lineWidth;
+                    ctx.lineWidth = BoardCanvasRender.lineWidth * this.ratio * 2;
+                    ctx.beginPath();
+                    ctx.strokeStyle = 'blue';
+                    var cellWidth = this.cellWidth * this.ratio;
+                    for (var i = 0; i < comb.length - 1; i++) {
+                        var LeftTopX = comb[i].col * cellWidth;
+                        var LeftTopY = comb[i].row * cellWidth;
+                        ctx.moveTo(LeftTopX + cellWidth / 2, LeftTopY + cellWidth / 2);
+                        LeftTopX = comb[i + 1].col * cellWidth;
+                        LeftTopY = comb[i + 1].row * cellWidth;
+                        ctx.lineTo(LeftTopX + cellWidth / 2, LeftTopY + cellWidth / 2);
+                    }
+                    ctx.stroke();
+                    ctx.closePath();
+                    ctx.lineWidth = lineWidthBefore;
                 };
                 BoardCanvasRender.lineWidth = 4;
                 BoardCanvasRender.figurePadding = 16;
